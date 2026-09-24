@@ -1,0 +1,81 @@
+name: Build and Sync CI
+
+on:
+  workflow_call:
+    secrets:
+      DOPPLER_TOKEN:
+        required: true
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
+      R2_ACCESS_KEY:
+        required: true
+      R2_SECRET_KEY:
+        required: true
+      R2_ENDPOINT:
+        required: true
+      R2_BUCKET:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          pacman -Sy --noconfirm base-devel gnupg git rclone
+
+      - name: Import GPG Key
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 -d > private.key
+          gpg --import --batch private.key
+          rm -f private.key
+
+      - name: Build packages
+        run: |
+          useradd builder -m
+          passwd -d builder
+          printf 'builder ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+          chown -R builder:builder .
+          for dir in */; do
+            if [ -f "$dir/PKGBUILD" ]; then
+              cd "$dir"
+              sudo -u builder makepkg -s --noconfirm --skippgpcheck
+              cd ..
+            fi
+          done
+
+      - name: Sign all packages
+        run: |
+          for pkg in $(find . -name "*.pkg.tar.zst" ! -name "*.sig"); do
+            echo "Signing $pkg..."
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --detach-sign "$pkg"
+          done
+
+      - name: Configure Rclone and Sync to R2
+        env:
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          mkdir -p ~/.config/rclone
+          cat <<EOF > ~/.config/rclone/rclone.conf
+          [r2]
+          type = s3
+          provider = Cloudflare
+          access_key_id = $R2_ACCESS_KEY
+          secret_access_key = $R2_SECRET_KEY
+          endpoint = $R2_ENDPOINT
+          EOF
+
+          rclone copy . r2:$R2_BUCKET/x86_64 --include "*.pkg.tar.zst" --include "*.pkg.tar.zst.sig" --progress
