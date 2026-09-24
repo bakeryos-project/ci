@@ -2,7 +2,9 @@ name: Build and Sync CI
 
 on:
   workflow_call:
-
+    secrets:
+      DOPPLER_TOKEN:
+        required: true
 jobs:
   build:
     runs-on: ubuntu-latest
