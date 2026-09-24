@@ -53,13 +53,19 @@ jobs:
           passwd -d builder
           printf 'builder ALL=(ALL) ALL\n' | tee -a /etc/sudoers
           chown -R builder:builder .
-          for dir in */; do
-            if [ -f "$dir/PKGBUILD" ]; then
-              cd "$dir"
-              sudo -u builder makepkg -s --noconfirm --skippgpcheck
-              cd ..
-            fi
-          done
+          
+          if [ -f "PKGBUILD" ]; then
+            echo "🔥 PKGBUILD found in the root directory; proceeding to build..."
+            sudo -u builder makepkg -s --noconfirm --skippgpcheck
+          else
+            for dir in */; do
+              if [ -f "$dir/PKGBUILD" ]; then
+                cd "$dir"
+                sudo -u builder makepkg -s --noconfirm --skippgpcheck
+                cd ..
+              fi
+            done
+          fi
 
       - name: Sign all packages
         run: |
