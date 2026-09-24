@@ -2,21 +2,6 @@ name: Build and Sync CI
 
 on:
   workflow_call:
-    secrets:
-      DOPPLER_TOKEN:
-        required: true
-      GPG_PRIVATE_KEY:
-        required: true
-      GPG_PASSPHRASE:
-        required: true
-      R2_ACCESS_KEY:
-        required: true
-      R2_SECRET_KEY:
-        required: true
-      R2_ENDPOINT:
-        required: true
-      R2_BUCKET:
-        required: true
 
 jobs:
   build:
