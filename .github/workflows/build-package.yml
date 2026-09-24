@@ -90,6 +90,7 @@ jobs:
           access_key_id = $R2_ACCESS_KEY
           secret_access_key = $R2_SECRET_KEY
           endpoint = $R2_ENDPOINT
+          no_check_bucket=true
           EOF
 
-          rclone copy . r2:$R2_BUCKET/x86_64 --include "*.pkg.tar.zst" --include "*.pkg.tar.zst.sig" --progress
+          rclone copy . r2:$R2_BUCKET/x86_64 --include "*.pkg.tar.zst" --include "*.pkg.tar.zst.sig" --progress --s3-no-check-bucket
