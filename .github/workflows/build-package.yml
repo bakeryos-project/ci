@@ -30,6 +30,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch secrets
+        uses: dopplerhq/secrets-fetch-action@v2.0.0
+        id: doppler
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          inject-env-vars: true
+
       - name: Install dependencies
         run: |
           pacman -Sy --noconfirm base-devel gnupg git rclone
