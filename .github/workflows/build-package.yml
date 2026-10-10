@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pacman -Sy --noconfirm base-devel gnupg git rclone
+          pacman -Syu --noconfirm base-devel gnupg git rclone meson ninja gtk4 rust cargo
 
       - name: Import GPG Key
         run: |
