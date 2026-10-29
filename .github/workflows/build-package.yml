@@ -33,7 +33,8 @@ jobs:
           echo "$GPG_PRIVATE_KEY" | base64 -d > private.key
           gpg --import --batch private.key
           rm -f private.key
-
+          gpg --batch --with-colons --list-secret-keys |
+            awk -F: '$1 == "fpr" { print $10 }'
       - name: Build packages
         run: |
           useradd builder -m
