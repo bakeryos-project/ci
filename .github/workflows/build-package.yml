@@ -56,13 +56,6 @@ jobs:
 
       - name: Sign all packages
         run: |
-<<<<<<< HEAD
-          ls -a
-          for pkg in $(find . -name "*.pkg.tar.zst" ! -name "*.sig"); do
-            echo "Signing $pkg..."
-            echo "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --detach-sign "$pkg"
-          done
-=======
            for pkg in $(find . -name "*.pkg.tar.zst" ! -name "*.sig"); do
              echo "Signing $pkg..."
              printf '%s' "$GPG_PASSPHRASE" | gpg \
@@ -73,7 +66,6 @@ jobs:
                --local-user "$GPG_FINGERPRINT" \
                --detach-sign "$pkg"
            done
->>>>>>> f201080 (update ci workflow)
 
       - name: Configure Rclone and Sync to R2
         run: |
