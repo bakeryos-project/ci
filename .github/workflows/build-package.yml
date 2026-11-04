@@ -47,7 +47,7 @@ jobs:
           passwd -d builder
           printf 'builder ALL=(ALL) ALL\n' | tee -a /etc/sudoers
           chown -R builder:builder .
-          
+
           if [ -f "PKGBUILD" ]; then
             echo "🔥 PKGBUILD found in the root directory; proceeding to build..."
             sudo -u builder makepkg -s --noconfirm --skippgpcheck
@@ -87,4 +87,4 @@ jobs:
           no_check_bucket=true
           EOF
 
-          rclone copy . r2:$R2_BUCKET/x86_64 --include "*.pkg.tar.zst" --include "*.pkg.tar.zst.sig" --progress --s3-no-check-bucket
+          rclone copy . r2:$R2_BUCKET/x86_64 --include "*.pkg.tar.zst" --include "*.pkg.tar.zst.sig" --include "*.files" --progress --s3-no-check-bucket
